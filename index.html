@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#090b16">
+<title>Associations — Think Together</title>
+
+<style>
+:root {
+  --bg: #090b16;
+  --panel: rgba(22, 27, 48, .78);
+  --border: rgba(255,255,255,.09);
+  --text: #f5f6ff;
+  --muted: #929bb8;
+  --purple: #9875ff;
+  --cyan: #62e7ff;
+  --green: #70f5b0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--text);
+  background:
+    radial-gradient(ellipse at 10% 0%, #302052 0, transparent 40%),
+    radial-gradient(ellipse at 95% 80%, #102e4b 0, transparent 40%),
+    var(--bg);
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+button, input, textarea, select {
+  font: inherit;
+}
+
+button {
+  color: var(--text);
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+button:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
+}
+
+.app {
+  width: min(1000px, 92%);
+  margin: auto;
+  padding: 20px 0 45px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 65px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 900;
+  letter-spacing: -.6px;
+}
+
+.logo-icon {
+  width: 45px;
+  height: 45px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  font-size: 25px;
+  background: linear-gradient(135deg, #a78bfa, #5367ff);
+  box-shadow: 0 0 30px #8060ff55;
+}
+
+.logo small {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+
+button, .panel {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn {
+  border: 1px solid var(--border);
+  background: #ffffff08;
+  padding: 13px 17px;
+  border-radius: 13px;
+  font-weight: 750;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.13);
+}
+
+.primary {
+  background: linear-gradient(110deg, #9270ff, #6357ed);
+  border-color: transparent;
+  box-shadow: 0 8px 30px #8060ff25;
+}
+
+.cyan {
+  background: linear-gradient(110deg, #48d9ef, #7793ff);
+  color: #080c18;
+  border: 0;
+}
+
+.full {
+  width: 100%;
+  margin-top: 13px;
+}
+
+.panel {
+  padding: 25px;
+  border: 1px solid var(--border);
+  border-radius: 23px;
+  background: var(--panel);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 20px 70px #0002;
+}
+
+.screen {
+  display: none;
+}
+
+.screen.active {
+  display: block;
+  animation: appear .35s ease both;
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes glow {
+  0%,100% { box-shadow: 0 0 25px #9270ff15; }
+  50% { box-shadow: 0 0 45px #9270ff45; }
+}
+
+@keyframes reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(15px) scale(.94);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.hero {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 40px;
+}
+
+.eyebrow {
+  color: var(--cyan);
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 3px;
+}
+
+h1 {
+  font-size: clamp(43px, 9vw, 78px);
+  line-height: 1.03;
+  letter-spacing: -4px;
+  margin: 22px 0;
+}
+
+.gradient {
+  color: transparent;
+  background: linear-gradient(100deg, #b9a5ff, #69e8ff);
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+.subtitle {
+  max-width: 510px;
+  margin: auto;
+  color: var(--muted);line-height: 1.8;
+}
+
+h2, h3, p {
+  overflow-wrap: anywhere;
+}
+
+.section-title {
+  margin: 0 0 8px;
+  font-size: 19px;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 9px;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 1px;
+  font-weight: 800;
+}
+
+input, textarea, select {
+  width: 100%;
+  padding: 15px;
+  color: white;
+  background: #090c18;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px #9270ff20;
+}
+
+.profile {
+  max-width: 440px;
+  margin: 0 auto 22px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 17px;
+}
+
+.stats {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+}
+
+.stat {
+  flex: 1;
+  min-width: 100px;
+  padding: 17px;
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: #ffffff05;
+}
+
+.stat strong {
+  display: block;
+  font-size: 25px;
+}
+
+.stat span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.screen-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.screen-head h2 {
+  margin: 0;
+  font-size: 25px;
+}
+
+.room-code {
+  font-size: 25px;
+  font-weight: 900;
+  letter-spacing: 5px;
+  color: var(--cyan);
+}
+
+.lobby-grid {
+  display: grid;
+  grid-template-columns: 1.1fr .9fr;
+  gap: 17px;
+}
+
+.player-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.player {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 13px;
+  background: #ffffff06;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  animation: appear .3s ease;
+}
+
+.player-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.avatar {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #9270ff, #43d6f0);
+  color: white;
+  font-weight: 900;
+}
+
+.badge {
+  color: var(--green);
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.score-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  padding: 20px;
+  margin-bottom: 23px;
+  border: 1px solid #9270ff44;
+  border-radius: 20px;
+  background: linear-gradient(120deg, #9270ff18, #55e5ff09);
+}
+
+.score-number {
+  color: var(--cyan);
+  font-size: 39px;
+  font-weight: 950;
+  letter-spacing: -2px;
+}
+
+.round-info {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.progress {
+  height: 5px;
+  margin-top: 12px;
+  background: #ffffff10;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.progress div {
+  width: 0;
+  height: 100%;
+  background: linear-gradient(90deg, var(--purple), var(--cyan));
+  transition: width .4s;
+}
+
+.category-card {
+  margin: 22px 0;
+  padding: 40px 20px;
+  text-align: center;
+  border: 1px solid #9270ff44;
+  border-radius: 25px;
+  background:
+    radial-gradient(ellipse at 50% 0%, #9270ff28, transparent 70%),
+    #ffffff05;
+  animation: glow 4s infinite;
+}
+
+.category-card h2 {
+  margin: 18px 0;
+  font-size: clamp(27px, 6vw, 44px);
+  letter-spacing: -1.5px;
+}
+
+textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.waiting {
+  display: none;
+  padding: 23px;
+  text-align: center;
+  border: 1px solid #9270ff33;
+  border-radius: 16px;
+  background: #9270ff10;
+}
+
+.waiting.show {
+  display: block;
+  animation: appear .3s ease;
+}
+
+.waiting-icon {
+  font-size: 30px;
+  animation: glow 2s infinite;
+}
+
+.answer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));gap: 12px;
+  margin: 20px 0;
+}
+
+.answer-card {
+  padding: 17px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: #ffffff05;
+  overflow-wrap: anywhere;
+  animation: reveal .45s ease both;
+}
+
+.answer-card.match {
+  border-color: #70f5b055;
+  background: #70f5b010;
+}
+
+.answer-card strong {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.answer-text {
+  font-size: 19px;
+  font-weight: 850;
+}
+
+.round-points {
+  padding: 25px;
+  margin: 20px 0;
+  text-align: center;
+  border: 1px solid #9270ff33;
+  border-radius: 20px;
+  background: linear-gradient(120deg, #9270ff18, #55e5ff12);
+}
+
+.round-points strong {
+  display: block;
+  margin: 8px 0;
+  color: var(--green);
+  font-size: 44px;
+}
+
+.history-list {
+  display: grid;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.history-item {
+  padding: 19px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: #ffffff05;
+}
+
+.history-item h3 {
+  margin-top: 0;
+}
+
+.toast {
+  position: fixed;
+  z-index: 100;
+  bottom: 22px;
+  left: 50%;
+  width: max-content;
+  max-width: 90%;
+  padding: 14px 20px;
+  color: white;
+  background: #242a40;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  text-align: center;
+  opacity: 0;
+  transform: translate(-50%, 15px);
+  pointer-events: none;
+  transition: .25s;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.modal {
+  position: fixed;
+  z-index: 50;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: #000a;
+  backdrop-filter: blur(10px);
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal .panel {
+  width: min(450px, 100%);
+}
+
+footer {
+  margin-top: 45px;
+  text-align: center;
+  color: #68708c;
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 650px) {
+  header {
+    margin-bottom: 45px;
+  }
+
+  h1 {
+    letter-spacing: -2px;
+  }
+
+  .grid, .lobby-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .panel {
+    padding: 19px;
+  }
+
+  .screen-head h2 {
+    font-size: 21px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">✳</div>
+    <div>
+      ASSOCIATIONS
+      <small>THINK TOGETHER</small>
+    </div>
+  </div>
+
+  <button class="btn" id="settingsButton">⚙ Einstellungen</button>
+</header>
+
+<!-- HAUPTMENÜ -->
+
+<section class="screen active" id="screen-home">
+
+  <div class="hero">
+    <div class="eyebrow">✦ THE POWER OF THINKING ALIKE</div>
+
+    <h1>
+      One mind.<br>
+      <span class="gradient">Many players.</span>
+    </h1>
+
+    <p class="subtitle">
+      Ein Thema. Deine Antwort. Eure gemeinsame Mission:
+      Denkt alle an dasselbe Wort.
+    </p>
+  </div>
+
+  <div class="panel profile">
+    <label class="field-label" for="username">DEIN USERNAME</label>
+
+    <input id="username"
+      maxlength="20"
+      placeholder="Wie sollen dich andere nennen?"
+      autocomplete="nickname">
+
+    <button class="btn full" id="saveUsername">
+      Profil speichern ✓
+    </button>
+  </div>
+
+  <div class="grid">
+
+    <div class="panel">
+      <h2 class="section-title">✦ Lobby erstellen</h2>
+
+      <p class="muted">
+        Erstelle einen Raum und lade deine Freunde
+        mit einem Code ein.
+      </p>
+
+      <button class="btn primary full" id="createButton">
+        Lobby erstellen ↗
+      </button>
+    </div>
+
+    <div class="panel">
+      <h2 class="section-title">⌁ Lobby beitreten</h2>
+
+      <p class="muted">
+        Gib den Lobby-Code deines Freundes ein.
+      </p>
+
+      <input id="joinCode"
+        maxlength="6"
+        placeholder="ABC123"autocomplete="off">
+
+      <button class="btn cyan full" id="joinButton">
+        Beitreten →
+      </button>
+    </div>
+
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <strong id="statGames">0</strong>
+      <span>Partien</span>
+    </div>
+
+    <div class="stat">
+      <strong id="statRounds">0</strong>
+      <span>Runden</span>
+    </div>
+
+    <div class="stat">
+      <strong id="statPoints">0</strong>
+      <span>Team-Punkte gesammelt</span>
+    </div>
+  </div>
+
+</section>
+
+<!-- LOBBY -->
+
+<section class="screen" id="screen-lobby">
+
+  <div class="screen-head">
+
+    <button class="btn" id="leaveLobby">
+      ← Hauptmenü
+    </button>
+
+    <div>
+      <div class="muted">DEIN LOBBY-CODE</div>
+      <div class="room-code" id="lobbyCode">------</div>
+    </div>
+
+    <button class="btn" id="copyCode">
+      Code kopieren
+    </button>
+
+  </div>
+
+  <div class="lobby-grid">
+
+    <div class="panel">
+      <h2 class="section-title">Spieler im Raum</h2>
+
+      <p class="muted">
+        Teile den Code mit deinen Freunden.
+      </p>
+
+      <div class="player-list" id="playerList"></div>
+    </div>
+
+    <div class="panel">
+      <h2 class="section-title">Spiel konfigurieren</h2>
+
+      <p class="muted">
+        Legt gemeinsam eure Rundenzahl fest.
+      </p>
+
+      <label class="field-label" for="roundCount">
+        RUNDENANZAHL
+      </label>
+
+      <select id="roundCount">
+        <option value="3">3 Runden</option>
+        <option value="5" selected>5 Runden</option>
+        <option value="8">8 Runden</option>
+        <option value="10">10 Runden</option>
+        <option value="15">15 Runden</option>
+        <option value="20">20 Runden</option>
+      </select>
+
+      <div id="hostControls">
+        <button class="btn primary full" id="startGame">
+          Spiel starten ✦
+        </button>
+      </div>
+
+      <p class="muted" id="lobbyHint"></p>
+    </div>
+
+  </div>
+</section>
+
+<!-- SPIEL -->
+
+<section class="screen" id="screen-game">
+
+  <div class="score-panel">
+    <div>
+      <div class="muted">GEMEINSAMER TEAM-SCORE</div>
+      <div class="score-number" id="teamScore">0</div>
+    </div>
+
+    <div style="text-align:right">
+      <div class="muted">LOBBY</div>
+      <strong id="gameLobbyCode">------</strong>
+    </div>
+  </div>
+
+  <div class="round-info">
+    <span id="roundLabel">RUNDE 1 / 5</span>
+    <span id="submissionLabel">0 / 2 FERTIG</span>
+  </div>
+
+  <div class="progress">
+    <div id="roundProgress"></div>
+  </div>
+
+  <div class="category-card">
+    <div class="eyebrow">✦ EURE KATEGORIE</div>
+
+    <h2 id="categoryTitle">Bereit?</h2>
+
+    <p class="muted">
+      Denkt unabhängig voneinander.
+      Schreibt das erste Wort auf, das euch einfällt.
+    </p>
+  </div>
+
+  <div class="panel">
+
+    <div id="answerArea">
+      <h2 class="section-title">Was ist deine Antwort?</h2>
+
+      <p class="muted">
+        Niemand sieht deine Antwort, bevor alle
+        Spieler fertig sind.
+      </p>
+
+      <textarea id="answerInput"
+        maxlength="120"
+        placeholder="Dein Wort ..."></textarea>
+
+      <button class="btn primary full" id="submitAnswer">
+        Antwort abgeben ✓
+      </button>
+    </div>
+
+    <div class="waiting" id="waitingPanel">
+      <div class="waiting-icon">✦</div>
+      <h3>Antwort gespeichert!</h3>
+
+      <p class="muted" id="waitingText">
+        Wir warten auf die anderen Spieler ...
+      </p>
+    </div>
+
+    <div id="revealArea" hidden>
+      <h2 class="section-title">Die Antworten sind da!</h2>
+
+      <p class="muted">
+        Gleiche Antworten zählen unabhängig von Groß-
+        und Kleinschreibung.
+      </p>
+
+      <div class="answer-grid" id="answerGrid"></div>
+
+      <div class="round-points">
+        <div class="muted">PUNKTE FÜR DAS GESAMTE TEAM</div><strong id="roundPoints">+0</strong>
+
+        <span class="muted" id="roundPointsDescription"></span>
+      </div>
+
+      <button class="btn primary full" id="nextRound">
+        Nächste Runde →
+      </button>
+
+      <p class="muted" id="nextRoundHint"></p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ERGEBNISSE -->
+
+<section class="screen" id="screen-results">
+
+  <div class="hero">
+    <div class="eyebrow">✦ GAME COMPLETED</div>
+
+    <h1>
+      Team <span class="gradient">Result.</span>
+    </h1>
+
+    <p class="subtitle">
+      Wie gut habt ihr gemeinsam gedacht?
+    </p>
+  </div>
+
+  <div class="panel">
+
+    <div class="score-panel">
+      <div>
+        <div class="muted">GEMEINSAMER ENDSCORE</div>
+        <div class="score-number" id="finalScore">0</div>
+      </div>
+
+      <div style="text-align:right">
+        <div class="muted">ABGESCHLOSSENE RUNDEN</div>
+        <strong id="finalRounds">0</strong>
+      </div>
+    </div>
+
+    <h2 class="section-title">Rundenübersicht</h2>
+
+    <div class="history-list" id="historyList"></div>
+
+    <button class="btn primary full" id="backToLobby">
+      Zurück zur Lobby ↗
+    </button>
+
+    <p class="muted" id="resultsHint"></p>
+
+  </div>
+</section>
+
+<footer>
+  ASSOCIATIONS · THINK TOGETHER · PLAY TOGETHER
+</footer>
+
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<!-- EINSTELLUNGEN -->
+
+<div class="modal" id="settingsModal">
+  <div class="panel">
+
+    <div class="screen-head">
+      <h2>Einstellungen</h2>
+      <button class="btn" id="closeSettings">✕</button>
+    </div>
+
+    <label class="field-label" for="serverUrl">
+      ONLINE-SERVER-URL
+    </label>
+
+    <input id="serverUrl"
+      placeholder="https://dein-worker.workers.dev"
+      inputmode="url">
+
+    <p class="muted">
+      Trage hier die Adresse deines veröffentlichten
+      Multiplayer-Servers ein. Diese Einstellung wird
+      lokal auf deinem Gerät gespeichert.
+    </p>
+
+    <button class="btn primary full" id="saveSettings">
+      Einstellungen speichern
+    </button>
+
+  </div>
+</div>
+
+<script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+
+let socket = null;
+let currentState = null;
+let roomCode = "";
+let toastTimer = null;
+let lastRoundKey = "";
+let lastPhase = "";
+let reconnecting = false;
+
+function storageGet(key, fallback = "") {
+  try {
+    return localStorage.getItem(key) ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function storageSet(key, value) {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch {
+    toast("Lokaler Speicher ist nicht verfügbar.");
+    return false;
+  }
+}
+
+function getClientId() {
+  let id = storageGet("assoc_client_id");
+
+  if (!id) {
+    id = typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : "player-" + Math.random().toString(36).slice(2);
+
+    storageSet("assoc_client_id", id);
+  }
+
+  return id;
+}
+
+const clientId = getClientId();
+
+function getStats() {
+  try {
+    return JSON.parse(storageGet("assoc_stats", "{}")) || {};
+  } catch {
+    return {};
+  }
+}
+
+function refreshStats() {
+  const stats = getStats();
+
+  $("statGames").textContent = stats.games || 0;
+  $("statRounds").textContent = stats.rounds || 0;
+  $("statPoints").textContent = stats.points || 0;
+}
+
+function toast(message) {
+  $("toast").textContent = message;
+  $("toast").classList.add("show");
+
+  clearTimeout(toastTimer);
+
+  toastTimer = setTimeout(() => {
+    $("toast").classList.remove("show");
+  }, 2800);
+}
+
+function setScreen(name) {
+  document.querySelectorAll(".screen").forEach(screen => {
+    screen.classList.remove("active");
+  });
+
+  $("screen-" + name).classList.add("active");
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&": "&amp;","<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
+}
+
+function saveUsername() {
+  const name = $("username").value.trim().slice(0, 20);
+
+  if (!name) {
+    toast("Bitte gib einen Username ein.");
+    return "";
+  }
+
+  storageSet("assoc_username", name);
+  $("username").value = name;
+
+  return name;
+}
+
+function generateCode() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+
+  for (let i = 0; i < 6; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+
+  return code;
+}
+
+function getServerBase() {
+  const saved = storageGet("assoc_server_url").trim();
+
+  if (saved) {
+    return saved.replace(/\/+$/, "");
+  }
+
+  const host = location.hostname;
+
+  if (host.endsWith(".workers.dev")) {
+    return location.origin;
+  }
+
+  if (
+    location.protocol === "https:" &&
+    host &&
+    !host.includes("localhost")
+  ) {
+    return location.origin;
+  }
+
+  return "";
+}
+
+function openSettings() {
+  $("serverUrl").value = storageGet("assoc_server_url");
+  $("settingsModal").classList.add("show");
+}
+
+function connectRoom(code, mode) {
+  const username = saveUsername();
+
+  if (!username) return;
+
+  const base = getServerBase();
+
+  if (!base) {
+    toast("Bitte zuerst die Online-Server-URL einstellen.");
+    openSettings();
+    return;
+  }
+
+  let parsed;
+
+  try {
+    parsed = new URL(base);
+  } catch {
+    toast("Die Server-URL ist ungültig.");
+    return;
+  }
+
+  if (!["https:", "http:"].includes(parsed.protocol)) {
+    toast("Ungültiges Server-Protokoll.");
+    return;
+  }
+
+  if (
+    parsed.protocol === "http:" &&
+    location.protocol === "https:"
+  ) {
+    toast("Der Server muss HTTPS unterstützen.");
+    return;
+  }
+
+  if (socket) {
+    socket.onclose = null;
+    socket.close();
+    socket = null;
+  }
+
+  currentState = null;
+  roomCode = code;
+  lastRoundKey = "";
+  lastPhase = "";
+
+  const wsBase = base.replace(/^http/, "ws");
+
+  const params = new URLSearchParams({
+    room: code,
+    username,
+    clientId,
+    mode
+  });
+
+  toast("Verbinde mit der Lobby ...");
+
+  const activeSocket = new WebSocket(
+    wsBase + "/ws?" + params.toString()
+  );
+
+  socket = activeSocket;
+
+  activeSocket.onopen = () => {
+    if (socket === activeSocket) {
+      toast("Verbindung hergestellt ✓");
+    }
+  };
+
+  activeSocket.onmessage = event => {
+    let data;
+
+    try {
+      data = JSON.parse(event.data);
+    } catch {
+      return;
+    }
+
+    if (socket !== activeSocket) return;
+
+    if (data.type === "error") {
+      toast(data.message || "Ein Fehler ist aufgetreten.");
+
+      activeSocket.close();
+      return;
+    }
+
+    if (data.type === "state" && data.state) {
+      renderState(data.state);
+    }
+  };
+
+  activeSocket.onerror = () => {
+    if (socket === activeSocket) {
+      toast("Verbindungsfehler. Prüfe die Server-URL.");
+    }
+  };
+
+  activeSocket.onclose = () => {
+    if (socket !== activeSocket) return;
+
+    socket = null;
+    currentState = null;
+
+    if (!reconnecting) {
+      toast("Verbindung getrennt.");
+      setScreen("home");
+    }
+  };
+}
+
+function send(type, payload = {}) {
+  if (!socket || socket.readyState !== WebSocket.OPEN) {
+    toast("Keine Verbindung zur Lobby.");
+    return;
+  }
+
+  socket.send(JSON.stringify({
+    type,
+    ...payload
+  }));
+}
+
+function renderState(state) {
+  currentState = state;
+  roomCode = state.code || roomCode;
+
+  $("lobbyCode").textContent = roomCode;
+  $("gameLobbyCode").textContent = roomCode;
+  $("teamScore").textContent = state.teamScore;
+
+  if (state.phase === "lobby") {
+    renderLobby(state);
+    setScreen("lobby");
+  } else if (
+    state.phase === "playing" ||
+    state.phase === "reveal"
+  ) {
+    renderGame(state);
+    setScreen("game");
+  } else if (state.phase === "results") {
+    renderResults(state);setScreen("results");
+  }
+}
+
+function renderLobby(state) {
+  const isHost = state.hostId === clientId;
+
+  $("hostControls").hidden = !isHost;
+  $("roundCount").disabled = !isHost;
+
+  $("lobbyHint").textContent = isHost
+    ? "Du bist der Host. Starte, wenn alle bereit sind."
+    : "Warte darauf, dass der Host das Spiel startet.";
+
+  if (Number($("roundCount").value) !== state.roundsTotal) {
+    $("roundCount").value = state.roundsTotal;
+  }
+
+  $("startGame").disabled = state.players.length < 2;
+
+  $("playerList").innerHTML = state.players.map(player => `
+    <div class="player">
+      <div class="player-name">
+        <div class="avatar">
+          ${escapeHTML(player.username.slice(0, 1).toUpperCase())}
+        </div>
+
+        <div>
+          <strong>${escapeHTML(player.username)}</strong>
+          <div class="muted">
+            ${player.id === state.hostId ? "Lobby-Host" : "Spieler"}
+          </div>
+        </div>
+      </div>
+
+      <span class="badge">
+        ${player.id === state.hostId ? "★ HOST" : "● ONLINE"}
+      </span>
+    </div>
+  `).join("");
+}
+
+function renderGame(state) {
+  const isHost = state.hostId === clientId;
+  const me = state.players.find(player => player.id === clientId);
+  const submitted = !!(me && me.submitted);
+
+  const roundKey = state.gameId + ":" + state.roundIndex;
+
+  if (roundKey !== lastRoundKey) {
+    lastRoundKey = roundKey;
+    $("answerInput").value = "";
+  }
+
+  lastPhase = state.phase;
+
+  $("roundLabel").textContent =
+    `RUNDE ${state.roundIndex} / ${state.roundsTotal}`;
+
+  $("submissionLabel").textContent =
+    `${state.players.filter(player => player.submitted).length} / ${state.players.length} FERTIG`;
+
+  $("roundProgress").style.width =
+    `${state.roundIndex / state.roundsTotal * 100}%`;
+
+  $("categoryTitle").textContent = state.category;
+
+  $("answerArea").hidden =
+    state.phase !== "playing" || submitted;
+
+  $("waitingPanel").classList.toggle(
+    "show",
+    state.phase === "playing" && submitted
+  );
+
+  const waitingFor = state.players.filter(
+    player => !player.submitted
+  );
+
+  $("waitingText").textContent = waitingFor.length
+    ? "Warten auf: " + waitingFor.map(player => player.username).join(", ")
+    : "Alle Antworten sind da!";
+
+  $("revealArea").hidden = state.phase !== "reveal";
+
+  $("answerInput").disabled =
+    state.phase !== "playing" || submitted;
+
+  $("submitAnswer").disabled =
+    state.phase !== "playing" || submitted;
+
+  if (state.phase === "reveal") {
+    renderAnswers(state);
+
+    const lastRound = state.roundIndex >= state.roundsTotal;
+
+    $("nextRound").textContent = lastRound
+      ? "Endergebnis anzeigen ✦"
+      : "Nächste Runde →";
+
+    $("nextRound").disabled = !isHost;
+
+    $("nextRoundHint").textContent = isHost
+      ? "Du kannst die nächste Runde starten."
+      : "Warte auf den Host.";
+  }
+}
+
+function normalizeAnswer(answer) {
+  return String(answer)
+    .trim()
+    .toLocaleLowerCase("de-DE");
+}
+
+function renderAnswers(state) {
+  const round = state.history[state.history.length - 1];
+
+  if (!round) return;
+
+  const counts = {};
+
+  round.answers.forEach(item => {
+    const key = normalizeAnswer(item.answer);
+    counts[key] = (counts[key] || 0) + 1;
+  });
+
+  $("answerGrid").innerHTML = round.answers.map((item, index) => {
+    const matched = counts[normalizeAnswer(item.answer)] >= 2;
+
+    return `
+      <div class="answer-card ${matched ? "match" : ""}"
+           style="animation-delay:${index * 90}ms">
+
+        <strong>${escapeHTML(item.username)}</strong>
+
+        <div class="answer-text">
+          ${escapeHTML(item.answer)}
+        </div>
+
+        <div class="muted" style="margin-top:10px">
+          ${matched ? "✓ ÜBEREINSTIMMUNG" : "Keine Übereinstimmung"}
+        </div>
+
+      </div>
+    `;
+  }).join("");$("roundPoints").textContent = "+" + round.points;
+
+  $("roundPointsDescription").textContent = round.points
+    ? "Punkte für das gemeinsame Teamkonto."
+    : "Diesmal gab es keine Übereinstimmungen.";
+}
+
+function renderResults(state) {
+  $("finalScore").textContent = state.teamScore;
+  $("finalRounds").textContent = state.history.length;
+
+  $("historyList").innerHTML = state.history.map(round => `
+    <div class="history-item">
+
+      <h3>
+        Runde ${round.round}: ${escapeHTML(round.category)}
+      </h3>
+
+      <p class="muted">
+        Runde: +${round.points} Punkte
+        · Gesamt: ${round.scoreAfter}
+      </p>
+
+      <div class="answer-grid">
+        ${round.answers.map(item => `
+          <div class="answer-card">
+            <strong>${escapeHTML(item.username)}</strong>
+            <div class="answer-text">${escapeHTML(item.answer)}</div>
+          </div>
+        `).join("")}
+      </div>
+
+    </div>
+  `).join("");
+
+  $("backToLobby").disabled = state.hostId !== clientId;
+
+  $("resultsHint").textContent =
+    state.hostId === clientId
+      ? "Du kannst eine neue Partie in der Lobby starten."
+      : "Warte auf den Host.";
+
+  saveCompletedGame(state);
+}
+
+function saveCompletedGame(state) {
+  if (!state.gameId) return;
+
+  const key = "assoc_saved_" + state.gameId;
+
+  if (storageGet(key)) return;
+
+  const stats = getStats();
+
+  stats.games = (stats.games || 0) + 1;
+  stats.rounds = (stats.rounds || 0) + state.history.length;
+  stats.points = (stats.points || 0) + state.teamScore;
+
+  if (storageSet("assoc_stats", JSON.stringify(stats))) {
+    storageSet(key, "1");
+  }
+
+  refreshStats();
+}
+
+/* EVENTS */
+
+$("saveUsername").addEventListener("click", () => {
+  if (saveUsername()) {
+    toast("Profil gespeichert ✓");
+  }
+});
+
+$("createButton").addEventListener("click", () => {
+  if (!$("username").value.trim()) {
+    toast("Bitte gib zuerst deinen Username ein.");
+    $("username").focus();
+    return;
+  }
+
+  connectRoom(generateCode(), "create");
+});
+
+$("joinButton").addEventListener("click", () => {
+  const code = $("joinCode").value.trim().toUpperCase();
+
+  if (!/^[A-Z0-9]{6}$/.test(code)) {
+    toast("Der Lobby-Code muss 6 Zeichen haben.");
+    return;
+  }
+
+  connectRoom(code, "join");
+});
+
+$("joinCode").addEventListener("input", event => {
+  event.target.value = event.target.value.toUpperCase();
+});
+
+$("startGame").addEventListener("click", () => {
+  send("startGame", {
+    rounds: Number($("roundCount").value)
+  });
+});
+
+$("roundCount").addEventListener("change", () => {
+  send("setRounds", {
+    rounds: Number($("roundCount").value)
+  });
+});
+
+$("submitAnswer").addEventListener("click", () => {
+  const answer = $("answerInput").value.trim();
+
+  if (!answer) {
+    toast("Gib zuerst eine Antwort ein.");
+    return;
+  }
+
+  send("submit", {answer});
+});
+
+$("answerInput").addEventListener("keydown", event => {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault();
+    $("submitAnswer").click();
+  }
+});
+
+$("nextRound").addEventListener("click", () => {
+  if (!currentState) return;
+
+  if (currentState.roundIndex >= currentState.roundsTotal) {
+    send("finishGame");
+  } else {
+    send("nextRound");
+  }
+});
+
+$("leaveLobby").addEventListener("click", () => {
+  if (socket) {
+    socket.onclose = null;
+    socket.close();
+  }
+
+  socket = null;
+  currentState = null;
+  roomCode = "";
+
+  setScreen("home");
+});
+
+$("backToLobby").addEventListener("click", () => {
+  send("returnLobby");
+});
+
+$("copyCode").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(roomCode);
+    toast("Lobby-Code kopiert ✓");
+  } catch {
+    prompt("Kopiere diesen Lobby-Code:", roomCode);
+  }
+});
+
+$("settingsButton").addEventListener("click", openSettings);$("closeSettings").addEventListener("click", () => {
+  $("settingsModal").classList.remove("show");
+});
+
+$("settingsModal").addEventListener("click", event => {
+  if (event.target === $("settingsModal")) {
+    $("settingsModal").classList.remove("show");
+  }
+});
+
+$("saveSettings").addEventListener("click", () => {
+  const value = $("serverUrl").value.trim().replace(/\/+$/, "");
+
+  if (value) {
+    try {
+      const url = new URL(value);
+
+      if (!["https:", "http:"].includes(url.protocol)) {
+        throw new Error("Invalid protocol");
+      }
+
+      if (url.protocol === "http:" && location.protocol === "https:") {
+        toast("Bitte eine HTTPS-Adresse verwenden.");
+        return;
+      }
+    } catch {
+      toast("Bitte gib eine gültige Server-URL ein.");
+      return;
+    }
+  }
+
+  storageSet("assoc_server_url", value);
+
+  $("settingsModal").classList.remove("show");
+  toast("Einstellungen gespeichert ✓");
+});
+
+$("username").value = storageGet("assoc_username");
+
+refreshStats();
+</script>
+
+</body>
+  </html>
