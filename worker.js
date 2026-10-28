@@ -367,8 +367,9 @@ const CATEGORIES = [
   "Nenne ein Gerät mit Bluetooth",
 ];
 
-const ROUND_OPTIONS = [3, 5, 8, 10, 15, 20];
-const MAX_PLAYERS = 12;
+function randomId() {
+  return crypto.randomUUID();
+}
 
 function randomCategory() {
   return CATEGORIES[
@@ -378,12 +379,22 @@ function randomCategory() {
 
 function normalizeAnswer(answer) {
   return String(answer)
-    .toLocaleLowerCase("de-DE")
-  .return(/\s+/g, "");
+  .toLocaleLowerCase("de-DE")
+  .replace(/\s+/g, "");
 }
 
-function errorResponse(message, status = 400) {
-  return Response.json({ error: message }, { status });
+function validRounds(value) {
+  const number = Number(value);
+
+  if (
+    !Number.isInteger(number) ||
+    number < 1 ||
+    number > 100
+  ) {
+    return 5;
+  }
+
+  return number;
 }
 
 export default {
@@ -391,11 +402,10 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === "/ws") {
-      if (
-        request.headers.get("Upgrade")?.toLowerCase()
-        !== "websocket"
-      ) {
-        return errorResponse("WebSocket erforderlich.", 426);
+      if (!env.ROOMS) {
+        return new Response("Durable Object binding fehlt.", {
+          status: 500
+        });
       }
 
       const code = (
@@ -403,16 +413,24 @@ export default {
       ).toUpperCase();
 
       if (!/^[A-Z0-9]{6}$/.test(code)) {
-        return errorResponse("Ungültiger Lobby-Code.");
+        return new Response("Ungültiger Lobby-Code.", {
+          status: 400
+        });
       }
 
-      const id = env.ROOMS.idFromName(code);
+      const id = env.ROOM.idFromName(code);
       const room = env.ROOMS.get(id);
 
       return room.fetch(request);
     }
 
-    return env.ASSETS.fetch(request);
+    if (env.ASSETS) {
+      return env.ASSETS.fetch(request);
+    }
+
+    return new Response("Associations Server läuft.", {
+      status: 200
+    });
   }
 };
 
@@ -420,132 +438,124 @@ export class Room {
   constructor(ctx, env) {
     this.ctx = ctx;
     this.env = env;
-    this.room = null;
-    this.clients = new Map();
+    this.room = null;this.ready = this.ctx.storage
+      .get("room")
+      .then(saved => {
+        this.room = saved || null;
+      });
   }
 
   async fetch(request) {
+    if (
+      request.headers.get("Upgrade")?.toLowerCase()
+      !== "websocket"
+    ) {
+      return new Response("WebSocket erforderlich.", {
+        status: 426
+      });
+    }
+
     const url = new URL(request.url);
 
-    const mode = url.searchParams.get("mode");
     const code = (
       url.searchParams.get("room") || ""
     ).toUpperCase();
-
-    const clientId = (
-      url.searchParams.get("clientId") || ""
-    );
 
     const username = (
       url.searchParams.get("username") || ""
     ).trim().slice(0, 20);
 
-    if (
-      !["create", "join"].includes(mode) ||
-      !/^[A-Z0-9]{6}$/.test(code) ||
-      clientId.length < 5 ||
-      clientId.length > 100 ||
-      !username
-    ) {
-      return errorResponse("Ungültige Verbindungsdaten.");
+    const clientId = (
+      url.searchParams.get("clientId") || ""
+    ).slice(0, 100);
+
+    const mode = url.searchParams.get("mode");
+
+    await this.ready;
+
+    if (!username || !clientId) {
+      return new Response("Username oder Spieler-ID fehlt.", {
+        status: 400
+      });
     }
 
-    const pair = new WebSocketPair();
-    const client = pair[0];
-    const server = pair[1];
-
-    server.accept();
-
-    const reject = message => {
-      server.send(JSON.stringify({
-        type: "error",
-        message
-      }));
-
-      setTimeout(() => {
-        try {
-          server.close(1008, "Verbindung abgelehnt");
-        } catch {}
-      }, 100);
-
-      return new Response(null, {status: 101,
-        webSocket: client
+    if (mode !== "create" && mode !== "join") {
+      return new Response("Ungültiger Modus.", {
+        status: 400
       });
-    };
+    }
 
-    if (!this.room) {
-      if (mode !== "create") {
-        return reject("Diese Lobby existiert nicht.");
+    if (mode === "create") {
+      if (this.room && this.room.players.length > 0) {
+        return new Response("Diese Lobby existiert bereits.", {
+          status: 409
+        });
       }
 
       this.room = {
         code,
-        phase: "lobby",
         hostId: clientId,
-        players: [],
+        phase: "lobby",
         roundsTotal: 5,
-        roundIndex: 0,
-        category: "",
+        roundIndex: 1,
         teamScore: 0,
+        category: "",
         gameId: "",
+        players: [
+          {
+            id: clientId,
+            username,
+            submitted: false
+          }
+        ],
+        pendingAnswers: {},
         history: []
       };
-    } else if (mode === "create") {
-      return reject("Diese Lobby existiert bereits.");
-    }
-
-    const room = this.room;
-
-    const existingPlayer = room.players.find(
-      player => player.id === clientId
-    );
-
-    if (room.phase !== "lobby" && !existingPlayer) {
-      return reject("Diese Runde läuft bereits.");
-    }
-
-    if (
-      !existingPlayer &&
-      room.players.length >= MAX_PLAYERS
-    ) {
-      return reject("Diese Lobby ist voll.");
-    }
-
-    const oldSocket = this.clients.get(clientId);
-
-    if (oldSocket && oldSocket !== server) {
-      this.clients.set(clientId, server);
-
-      try {
-        oldSocket.close(1000, "Neue Verbindung");
-      } catch {}
     } else {
-      this.clients.set(clientId, server);
+      if (!this.room || this.room.players.length === 0) {
+        return new Response("Lobby nicht gefunden.", {
+          status: 404
+        });
+      }
+
+      const existing = this.room.players.find(
+        player => player.id === clientId
+      );
+
+      if (existing) {
+        existing.username = username;
+      } else {
+        if (this.room.phase !== "lobby") {
+          return new Response(
+            "Diese Partie läuft bereits.",
+            { status: 409 }
+          );
+        }
+
+        if (this.room.players.length >= 20) {
+          return new Response("Lobby ist voll.", {
+            status: 409
+          });
+        }
+
+        this.room.players.push({
+          id: clientId,
+          username,
+          submitted: false
+        });
+      }
     }
 
-    if (existingPlayer) {
-      existingPlayer.username = username;
-    } else {
-      room.players.push({
-        id: clientId,
-        username,
-        submitted: false,
-        answer: ""
-      });
-    }
+    const pair = new WebSocketPair();
+    const [client, server] = Object.values(pair);
 
-    server.addEventListener("message", event => {
-      this.onMessage(server, clientId, event.data);
+    this.ctx.acceptWebSocket(server);
+
+    server.serializeAttachment({
+      clientId
     });
 
-    server.addEventListener("close", () => {
-      this.onClose(server, clientId);
-    });
-
-    server.addEventListener("error", () => {
-      this.onClose(server, clientId);
-    });
-
+    await this.persist();
     this.broadcast();
 
     return new Response(null, {
@@ -554,21 +564,85 @@ export class Room {
     });
   }
 
-  onMessage(socket, clientId, rawData) {
-    if (
-      !this.room ||
-      this.clients.get(clientId) !== socket
-    ) {
-      return;
+  publicState() {
+    if (!this.room) return null;
+
+    const {
+      pendingAnswers,
+      ...state
+    } = this.room;
+
+    return {
+      ...state,
+      players: state.players.map(player => ({
+        id: player.id,
+        username: player.username,
+        submitted: player.submitted
+      }))
+    };
+  }
+
+  broadcast() {
+    if (!this.room) return;
+
+    const message = JSON.stringify({
+      type: "state",
+      state: this.publicState()
+    });
+
+    for (const ws of this.ctx.getWebSockets()) {
+      try {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(message);
+        }
+      } catch {
+        // Geschlossene Verbindungen ignorieren.
+      }
     }
+  }
+
+  async persist() {
+    if (this.room) {
+      await this.ctx.storage.put("room", this.room);
+    }
+  }
+
+  async update() {
+    await this.persist();
+    this.broadcast();
+  }
+
+  sendError(ws, message) {
+    try {
+      ws.send(JSON.stringify({
+        type: "error",
+        message
+      }));
+    } catch {
+      // Verbindung nicht mehr erreichbar.
+    }
+  }
+
+  async webSocketMessage(ws, message) {
+    await this.ready;if (!this.room) return;
 
     let data;
 
     try {
-      data = JSON.parse(rawData);
+      data = JSON.parse(
+        typeof message === "string"
+          ? message
+          : new TextDecoder().decode(message)
+      );
     } catch {
+      this.sendError(ws, "Ungültige Nachricht.");
       return;
     }
+
+    const attachment = ws.deserializeAttachment();
+    const clientId = attachment?.clientId;
+
+    if (!clientId) return;
 
     const room = this.room;
 
@@ -582,91 +656,93 @@ export class Room {
 
     switch (data.type) {
       case "setRounds": {
-        if (!isHost || room.phase !== "lobby") return;
+        if (!isHost || room.phase !== "lobby") {
+          return;
+        }
 
-        const rounds = Number(data.rounds);
+        room.roundsTotal = validRounds(data.rounds);
 
-        if (!ROUND_OPTIONS.includes(rounds)) return;
-
-        room.roundsTotal = rounds;
-        this.broadcast();
+        await this.update();
         break;
       }
 
       case "startGame": {
-        if (
-          !isHost ||
-          room.phase !== "lobby" ||
-          room.players.length < 2
-        ) {
+        if (!isHost || room.phase !== "lobby") {
           return;
         }
 
-        const rounds = Number(data.rounds);
-
-        if (ROUND_OPTIONS.includes(rounds)) {
-          room.roundsTotal = rounds;
+        if (room.players.length < 2) {
+          this.sendError(
+            ws,
+            "Mindestens zwei Spieler werden benötigt."
+          );
+          return;
         }
 
-        room.phase = "playing";
+        room.roundsTotal = validRounds(data.rounds);
         room.roundIndex = 1;
-        room.category = randomCategory();
         room.teamScore = 0;
+        room.category = randomCategory();
+        room.gameId = randomId();
         room.history = [];
-        room.gameId = crypto.randomUUID();
-
+        room.pendingAnswers = {};
         room.players.forEach(p => {
           p.submitted = false;
-          p.answer = "";
         });
+        room.phase = "playing";
 
-        this.broadcast();
+        await this.update();
         break;
       }
 
       case "submit": {
-        if (
-          room.phase !== "playing" ||
-          player.submitted
-        ) {
+        if (room.phase !== "playing") return;
+        if (player.submitted) return;
+
+        const answer = String(data.answer || "")
+          .trim()
+          .slice(0, 120);
+
+        if (!answer) {
+          this.sendError(ws, "Bitte eine Antwort eingeben.");
           return;
         }
 
-        const answer = String(
-          data.answer ?? ""
-        ).trim().slice(0, 120);
-
-        if (!answer) return;
-
-        player.answer = answer;
+        room.pendingAnswers[clientId] = answer;
         player.submitted = true;
 
-        if (room.players.every(p => p.submitted)) {
-          this.resolveRound();
+        if (
+          room.players.length > 0 &&
+          room.players.every(p => p.submitted)
+        ) {
+          this.finishRound();
+        } else {
+          await this.update();
         }
 
-        this.broadcast();
         break;
       }
 
       case "nextRound": {
-        if (!isHost || room.phase !== "reveal") return;
-
-        if (room.roundIndex >= room.roundsTotal) {room.phase = "results";
-          this.broadcast();
+        if (
+          !isHost ||
+          room.phase !== "reveal" ||
+          room.roundIndex >= room.roundsTotal
+        ) {
           return;
         }
 
         room.roundIndex++;
         room.category = randomCategory();
-        room.phase = "playing";
+        room.pendingAnswers = {};
 
         room.players.forEach(p => {
           p.submitted = false;
-          p.answer = "";
         });
 
-        this.broadcast();
+        room.phase = "playing";
+
+        await this.update();
         break;
       }
 
@@ -680,37 +756,39 @@ export class Room {
         }
 
         room.phase = "results";
-        this.broadcast();
+
+        await this.update();
         break;
       }
 
       case "returnLobby": {
-        if (!isHost || room.phase !== "results") return;
+        if (!isHost || room.phase !== "results") {
+          return;
+        }
 
         room.phase = "lobby";
-        room.roundIndex = 0;
+        room.roundIndex = 1;
         room.category = "";
+        room.pendingAnswers = {};
 
         room.players.forEach(p => {
           p.submitted = false;
-          p.answer = "";
         });
 
-        this.broadcast();
+        await this.update();
         break;
       }
     }
   }
 
-  resolveRound() {
+  async finishRound() {
     const room = this.room;
 
     if (!room || room.phase !== "playing") return;
 
     const answers = room.players.map(player => ({
-      id: player.id,
       username: player.username,
-      answer: player.answer
+      answer: room.pendingAnswers[player.id] || ""
     }));
 
     const counts = new Map();
@@ -718,18 +796,19 @@ export class Room {
     for (const item of answers) {
       const key = normalizeAnswer(item.answer);
 
-      counts.set(key, (counts.get(key) || 0) + 1);
+      counts.set(
+        key,
+        (counts.get(key) || 0) + 1
+      );
     }
 
     let points = 0;
 
     for (const count of counts.values()) {
       if (count >= 2) {
-        points += count * 10;
+        points += count;
       }
-    }
-
-    room.teamScore += points;
+    }room.teamScore += points;
 
     room.history.push({
       round: room.roundIndex,
@@ -740,14 +819,49 @@ export class Room {
     });
 
     room.phase = "reveal";
+
+    await this.update();
   }
 
-  onClose(socket, clientId) {
-    if (this.clients.get(clientId) !== socket) return;
+  async webSocketClose(ws) {
+    await this.removePlayer(ws);
+  }
 
-    this.clients.delete(clientId);
+  async webSocketError(ws) {
+    await this.removePlayer(ws);
+  }
+
+  async removePlayer(ws) {
+    await this.ready;
 
     if (!this.room) return;
+
+    let clientId;
+
+    try {
+      clientId = ws.deserializeAttachment()?.clientId;
+    } catch {
+      return;
+    }
+
+    if (!clientId) return;
+
+    const anotherConnection = this.ctx
+      .getWebSockets()
+      .some(other => {
+        if (other === ws) return false;
+
+        try {
+          return (
+            other.readyState === WebSocket.OPEN &&
+            other.deserializeAttachment()?.clientId === clientId
+          );
+        } catch {
+          return false;
+        }
+      });
+
+    if (anotherConnection) return;
 
     const room = this.room;
 
@@ -755,9 +869,11 @@ export class Room {
       player => player.id !== clientId
     );
 
+    delete room.pendingAnswers[clientId];
+
     if (room.players.length === 0) {
       this.room = null;
-      this.clients.clear();
+      await this.ctx.storage.delete("room");
       return;
     }
 
@@ -767,67 +883,12 @@ export class Room {
 
     if (
       room.phase === "playing" &&
-      room.players.length < 2
+      room.players.every(player => player.submitted)
     ) {
-      room.phase = "lobby";
-      room.roundIndex = 0;
-      room.category = "";
-
-      room.players.forEach(p => {
-        p.submitted = false;
-        p.answer = "";
-      });
-    } else if (
-      room.phase === "playing" &&
-      room.players.every(p => p.submitted)
-    ) {
-      this.resolveRound();
+      await this.finishRound();
+      return;
     }
 
-    this.broadcast();
-  }
-
-  publicState() {
-    const room = this.room;
-
-    if (!room) return null;
-
-    return {
-      code: room.code,
-      phase: room.phase,
-      hostId: room.hostId,
-
-      players: room.players.map(player => ({
-        id: player.id,
-        username: player.username,
-        submitted: player.submitted
-      })),
-
-      roundsTotal: room.roundsTotal,
-      roundIndex: room.roundIndex,
-      category: room.category,
-      teamScore: room.teamScore,
-      gameId: room.gameId,
-      history: room.history
-    };
-  }
-
-  broadcast() {
-    const state = this.publicState();
-
-    if (!state) return;
-
-    const message = JSON.stringify({
-      type: "state",
-      state
-    });
-
-    for (const socket of this.clients.values()) {
-      try {
-        if (socket.readyState === 1) {
-          socket.send(message);
-        }
-      } catch {}
-    }
+    await this.update();
   }
 }
