@@ -379,6 +379,14 @@ function normalizeAnswer(answer) {
     .replace(/[^\p{L}\p{N}]/gu, "");
 }
 
+function getWords(answer) {
+  return String(answer)
+    .trim()
+    .split(/\s+/)
+    .map(w => normalizeAnswer(w))
+    .filter(Boolean);
+}
+
 function normalizeCategory(category) {
   return String(category)
     .normalize("NFC")
@@ -391,62 +399,31 @@ function randomCategory(usedCategories = []) {
   const available = CATEGORIES.filter(
     category => !used.has(normalizeCategory(category))
   );
-
   if (available.length === 0) {
     throw new Error("Keine unbenutzten Kategorien mehr verfügbar.");
   }
-
   return available[Math.floor(Math.random() * available.length)];
 }
 
 function validRounds(value) {
   const number = Number(value);
-
-  if (
-    !Number.isInteger(number) ||
-    number < 1 ||
-    number > 100
-  ) {
-    return 5;
-  }
-
+  if (!Number.isInteger(number) || number < 1 || number > 100) return 5;
   return number;
 }
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-
     if (url.pathname === "/ws") {
-      if (!env.ROOMS) {
-        return new Response("Durable Object binding fehlt.", {
-          status: 500
-        });
-      }
-
-      const code = (
-        url.searchParams.get("room") || ""
-      ).toUpperCase();
-
-      if (!/^[A-Z0-9]{6}$/.test(code)) {
-        return new Response("Ungültiger Lobby-Code.", {
-          status: 400
-        });
-      }
-
+      if (!env.ROOMS) return new Response("Durable Object binding fehlt.", { status: 500 });
+      const code = (url.searchParams.get("room") || "").toUpperCase();
+      if (!/^[A-Z0-9]{6}$/.test(code)) return new Response("Ungültiger Lobby-Code.", { status: 400 });
       const id = env.ROOMS.idFromName(code);
       const room = env.ROOMS.get(id);
-
       return room.fetch(request);
     }
-
-    if (env.ASSETS) {
-      return env.ASSETS.fetch(request);
-    }
-
-    return new Response("Associations Server läuft.", {
-      status: 200
-    });
+    if (env.ASSETS) return env.ASSETS.fetch(request);
+    return new Response("Associations Server läuft.", { status: 200 });
   }
 };
 
@@ -455,427 +432,208 @@ export class Room {
     this.ctx = ctx;
     this.env = env;
     this.room = null;
-
-    this.ready = this.ctx.storage
-      .get("room")
-      .then(saved => {
-        this.room = saved || null;
-
-        // Felder ergänzen, falls eine ältere gespeicherte Lobby geladen wird.
-        if (this.room) {
-          this.room.usedCategories ??= [];
-          this.room.players ??= [];
-
-          this.room.players.forEach(player => {
-            player.usedAnswers ??= [];
-          });
-        }
-      });
+    this.ready = this.ctx.storage.get("room").then(saved => {
+      this.room = saved || null;
+      if (this.room) {
+        this.room.usedCategories ??= [];
+        this.room.players ??= [];
+        this.room.players.forEach(p => p.usedAnswers ??= []);
+      }
+    });
   }
 
   async fetch(request) {
-    if (
-      request.headers.get("Upgrade")?.toLowerCase() !== "websocket"
-    ) {
-      return new Response("WebSocket erforderlich.", {
-        status: 426
-      });
+    if (request.headers.get("Upgrade")?.toLowerCase() !== "websocket") {
+      return new Response("WebSocket erforderlich.", { status: 426 });
     }
-
     const url = new URL(request.url);
-
-    const code = (
-      url.searchParams.get("room") || ""
-    ).toUpperCase();
-
-    const username = (
-      url.searchParams.get("username") || ""
-    ).trim().slice(0, 20);
-
-    const clientId = (
-      url.searchParams.get("clientId") || ""
-    ).slice(0, 100);
-
+    const code = (url.searchParams.get("room") || "").toUpperCase();
+    const username = (url.searchParams.get("username") || "").trim().slice(0, 20);
+    const clientId = (url.searchParams.get("clientId") || "").slice(0, 100);
     const mode = url.searchParams.get("mode");
-
     await this.ready;
-
-    if (!username || !clientId) {
-      return new Response("Username oder Spieler-ID fehlt.", {
-        status: 400
-      });
-    }
-
-    if (mode !== "create" && mode !== "join") {
-      return new Response("Ungültiger Modus.", {
-        status: 400
-      });
-    }
+    if (!username || !clientId) return new Response("Username oder Spieler-ID fehlt.", { status: 400 });
+    if (mode !== "create" && mode !== "join") return new Response("Ungültiger Modus.", { status: 400 });
 
     if (mode === "create") {
-      if (this.room && this.room.players.length > 0) {
-        return new Response("Diese Lobby existiert bereits.", {
-          status: 409
-        });
-      }
-
+      if (this.room && this.room.players.length > 0) return new Response("Diese Lobby existiert bereits.", { status: 409 });
       this.room = {
-        code,
-        hostId: clientId,
-        phase: "lobby",
-        roundsTotal: 5,
-        roundIndex: 1,
-        teamScore: 0,
-        category: "",
-        gameId: "",
-        usedCategories: [],
-        players: [
-          {
-            id: clientId,
-            username,
-            submitted: false,
-            usedAnswers: []
-          }
-        ],
-        pendingAnswers: {},
-        history: []
+        code, hostId: clientId, phase: "lobby", roundsTotal: 5, roundIndex: 1,
+        teamScore: 0, category: "", gameId: "", usedCategories: [],
+        players: [{ id: clientId, username, submitted: false, usedAnswers: [] }],
+        pendingAnswers: {}, history: []
       };
     } else {
-      if (!this.room || this.room.players.length === 0) {
-        return new Response("Lobby nicht gefunden.", {
-          status: 404
-        });
-      }
-
-      const existing = this.room.players.find(
-        player => player.id === clientId
-      );
-
+      if (!this.room || this.room.players.length === 0) return new Response("Lobby nicht gefunden.", { status: 404 });
+      const existing = this.room.players.find(p => p.id === clientId);
       if (existing) {
         existing.username = username;
         existing.usedAnswers ??= [];
       } else {
-        if (this.room.phase !== "lobby") {
-          return new Response(
-            "Diese Partie läuft bereits.",
-            { status: 409 }
-          );
-        }
-
-        if (this.room.players.length >= 20) {
-          return new Response("Lobby ist voll.", {
-            status: 409
-          });
-        }
-
-        this.room.players.push({
-          id: clientId,
-          username,
-          submitted: false,
-          usedAnswers: []
-        });
+        if (this.room.phase !== "lobby") return new Response("Diese Partie läuft bereits.", { status: 409 });
+        if (this.room.players.length >= 20) return new Response("Lobby ist voll.", { status: 409 });
+        this.room.players.push({ id: clientId, username, submitted: false, usedAnswers: [] });
       }
     }
-
     const pair = new WebSocketPair();
     const [client, server] = Object.values(pair);
-
     this.ctx.acceptWebSocket(server);
-
-    server.serializeAttachment({
-      clientId
-    });
-
+    server.serializeAttachment({ clientId });
     await this.persist();
     this.broadcast();
-
-    return new Response(null, {
-      status: 101,
-      webSocket: client
-    });
+    return new Response(null, { status: 101, webSocket: client });
   }
 
   publicState() {
     if (!this.room) return null;
-
-    const {
-      pendingAnswers,
-      usedCategories,
-      ...state
-    } = this.room;
-
-    return {
-      ...state,
-      players: state.players.map(player => ({
-        id: player.id,
-        username: player.username,
-        submitted: player.submitted
-      }))
-    };
+    const { pendingAnswers, usedCategories, ...state } = this.room;
+    return { ...state, players: state.players.map(p => ({ id: p.id, username: p.username, submitted: p.submitted })) };
   }
 
   broadcast() {
     if (!this.room) return;
-
-    const message = JSON.stringify({
-      type: "state",
-      state: this.publicState()
-    });
-
+    const message = JSON.stringify({ type: "state", state: this.publicState() });
     for (const ws of this.ctx.getWebSockets()) {
-      try {
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.send(message);
-        }
-      } catch {
-        // Geschlossene Verbindungen ignorieren.
-      }
+      try { if (ws.readyState === WebSocket.OPEN) ws.send(message); } catch {}
     }
   }
 
-  async persist() {
-    if (this.room) {
-      await this.ctx.storage.put("room", this.room);
-    }
-  }
-
-  async update() {
-    await this.persist();
-    this.broadcast();
-  }
+  async persist() { if (this.room) await this.ctx.storage.put("room", this.room); }
+  async update() { await this.persist(); this.broadcast(); }
 
   sendError(ws, message) {
-    try {
-      ws.send(JSON.stringify({
-        type: "error",
-        message
-      }));
-    } catch {
-      // Verbindung nicht mehr erreichbar.
-    }
+    try { ws.send(JSON.stringify({ type: "error", message })); } catch {}
   }
 
   async webSocketMessage(ws, message) {
     await this.ready;
-
     if (!this.room) return;
-
     let data;
-
-    try {
-      data = JSON.parse(
-        typeof message === "string"
-          ? message
-          : new TextDecoder().decode(message)
-      );
-    } catch {
-      this.sendError(ws, "Ungültige Nachricht.");
-      return;
-    }
-
-    const attachment = ws.deserializeAttachment();
-    const clientId = attachment?.clientId;
-
+    try { data = JSON.parse(typeof message === "string" ? message : new TextDecoder().decode(message)); } catch { this.sendError(ws, "Ungültige Nachricht."); return; }
+    const clientId = ws.deserializeAttachment()?.clientId;
     if (!clientId) return;
-
     const room = this.room;
-
-    const player = room.players.find(
-      item => item.id === clientId
-    );
-
+    const player = room.players.find(item => item.id === clientId);
     if (!player) return;
-
     player.usedAnswers ??= [];
     room.usedCategories ??= [];
-
     const isHost = room.hostId === clientId;
 
     switch (data.type) {
       case "setRounds": {
-        if (!isHost || room.phase !== "lobby") {
-          return;
-        }
-
+        if (!isHost || room.phase !== "lobby") return;
         room.roundsTotal = validRounds(data.rounds);
-
-        await this.update();
-        break;
+        await this.update(); break;
       }
-
       case "startGame": {
-        if (!isHost || room.phase !== "lobby") {
-          return;
-        }
-
-        if (room.players.length < 2) {
-          this.sendError(
-            ws,
-            "Mindestens zwei Spieler werden benötigt."
-          );
-          return;
-        }
-
+        if (!isHost || room.phase !== "lobby") return;
+        if (room.players.length < 2) { this.sendError(ws, "Mindestens zwei Spieler werden benötigt."); return; }
         room.roundsTotal = validRounds(data.rounds);
-        room.roundIndex = 1;
-        room.teamScore = 0;
-        room.gameId = randomId();
-        room.history = [];
-        room.pendingAnswers = {};
-        room.usedCategories = [];
-
-        room.players.forEach(p => {
-          p.submitted = false;
-          p.usedAnswers = [];
-        });
-
+        room.roundIndex = 1; room.teamScore = 0; room.gameId = randomId();
+        room.history = []; room.pendingAnswers = {}; room.usedCategories = [];
+        room.players.forEach(p => { p.submitted = false; p.usedAnswers = []; });
         room.category = randomCategory(room.usedCategories);
         room.usedCategories.push(normalizeCategory(room.category));
         room.phase = "playing";
-
-        await this.update();
-        break;
+        await this.update(); break;
       }
-
       case "submit": {
         if (room.phase !== "playing") return;
         if (player.submitted) return;
-
-        const answer = String(data.answer || "")
-          .trim()
-          .slice(0, 120);
-
-        if (!answer) {
-          this.sendError(ws, "Bitte eine Antwort eingeben.");
-          return;
-        }
-
+        const answer = String(data.answer || "").trim().slice(0, 120);
+        if (!answer) { this.sendError(ws, "Bitte eine Antwort eingeben."); return; }
         const normalized = normalizeAnswer(answer);
-
-        if (!normalized) {
-          this.sendError(
-            ws,
-            "Bitte gib ein Wort mit Buchstaben oder Zahlen ein."
-          );
-          return;
-        }
-
+        if (!normalized) { this.sendError(ws, "Bitte gib ein Wort mit Buchstaben oder Zahlen ein."); return; }
         if (player.usedAnswers.includes(normalized)) {
-          this.sendError(
-            ws,
-            "Du hast dieses Wort in dieser Partie bereits benutzt."
-          );
-          return;
+          this.sendError(ws, "Du hast dieses Wort in dieser Partie bereits benutzt."); return;
         }
-
         player.usedAnswers.push(normalized);
         room.pendingAnswers[clientId] = answer;
         player.submitted = true;
-
-        if (
-          room.players.length > 0 &&
-          room.players.every(p => p.submitted)
-        ) {
+        if (room.players.length > 0 && room.players.every(p => p.submitted)) {
           await this.finishRound();
-        } else {
-          await this.update();
-        }
-
+        } else { await this.update(); }
         break;
       }
-
       case "nextRound": {
-        if (
-          !isHost ||
-          room.phase !== "reveal" ||
-          room.roundIndex >= room.roundsTotal
-        ) {
-          return;
-        }
-
-        room.roundIndex++;
-        room.pendingAnswers = {};
-
-        room.players.forEach(p => {
-          p.submitted = false;
-        });
-
+        if (!isHost || room.phase !== "reveal" || room.roundIndex >= room.roundsTotal) return;
+        room.roundIndex++; room.pendingAnswers = {};
+        room.players.forEach(p => p.submitted = false);
         room.category = randomCategory(room.usedCategories);
         room.usedCategories.push(normalizeCategory(room.category));
         room.phase = "playing";
-
-        await this.update();
-        break;
+        await this.update(); break;
       }
-
       case "finishGame": {
-        if (
-          !isHost ||
-          room.phase !== "reveal" ||
-          room.roundIndex < room.roundsTotal
-        ) {
-          return;
-        }
-
-        room.phase = "results";
-
-        await this.update();
-        break;
+        if (!isHost || room.phase !== "reveal" || room.roundIndex < room.roundsTotal) return;
+        room.phase = "results"; await this.update(); break;
       }
-
       case "returnLobby": {
-        if (!isHost || room.phase !== "results") {
-          return;
-        }
-
-        room.phase = "lobby";
-        room.roundIndex = 1;
-        room.category = "";
-        room.pendingAnswers = {};
-        room.usedCategories = [];
-
-        room.players.forEach(p => {
-          p.submitted = false;
-          p.usedAnswers = [];
-        });
-
-        await this.update();
-        break;
+        if (!isHost || room.phase !== "results") return;
+        room.phase = "lobby"; room.roundIndex = 1; room.category = "";
+        room.pendingAnswers = {}; room.usedCategories = [];
+        room.players.forEach(p => { p.submitted = false; p.usedAnswers = []; });
+        await this.update(); break;
       }
     }
   }
 
   async finishRound() {
     const room = this.room;
-
     if (!room || room.phase !== "playing") return;
 
-    const answers = room.players.map(player => ({
-      username: player.username,
-      answer: room.pendingAnswers[player.id] || ""
+    const answers = room.players.map(p => ({
+      username: p.username,
+      answer: room.pendingAnswers[p.id] || ""
     }));
 
     const counts = new Map();
-
     for (const item of answers) {
       const key = normalizeAnswer(item.answer);
-
-      counts.set(
-        key,
-        (counts.get(key) || 0) + 1
-      );
+      counts.set(key, (counts.get(key) || 0) + 1);
     }
 
     let points = 0;
+    const exactPairs = new Set();
 
-    for (const count of counts.values()) {
+    for (const [key, count] of counts.entries()) {
       if (count >= 2) {
         points += count;
+        const indices = answers.map((a, i) => normalizeAnswer(a.answer) === key ? i : -1).filter(i => i !== -1);
+        for (let i = 0; i < indices.length; i++) {
+          for (let j = i + 1; j < indices.length; j++) {
+            exactPairs.add(`${indices[i]}-${indices[j]}`);
+          }
+        }
+      }
+    }
+
+    // NEUE REGEL: Teilpunkte bei Mehrwort-Antworten
+    for (let i = 0; i < answers.length; i++) {
+      for (let j = i + 1; j < answers.length; j++) {
+        const pairKey = `${i}-${j}`;
+        if (exactPairs.has(pairKey)) continue;
+
+        const aText = answers[i].answer;
+        const bText = answers[j].answer;
+
+        if (!aText.includes(" ") && !bText.includes(" ")) continue;
+
+        const wordsA = getWords(aText);
+        const wordsB = getWords(bText);
+        if (wordsA.length === 0 || wordsB.length === 0) continue;
+
+        const setA = new Set(wordsA);
+        const setB = new Set(wordsB);
+        const inter = [...setA].filter(w => setB.has(w));
+        if (inter.length === 0) continue;
+
+        const isFull = setA.size === setB.size && inter.length === setA.size;
+        points += isFull ? 2 : 1;
       }
     }
 
     room.teamScore += points;
-
     room.history.push({
       round: room.roundIndex,
       category: room.category,
@@ -883,78 +641,30 @@ export class Room {
       points,
       scoreAfter: room.teamScore
     });
-
     room.phase = "reveal";
-
     await this.update();
   }
 
-  async webSocketClose(ws) {
-    await this.removePlayer(ws);
-  }
-
-  async webSocketError(ws) {
-    await this.removePlayer(ws);
-  }
+  async webSocketClose(ws) { await this.removePlayer(ws); }
+  async webSocketError(ws) { await this.removePlayer(ws); }
 
   async removePlayer(ws) {
     await this.ready;
-
     if (!this.room) return;
-
     let clientId;
-
-    try {
-      clientId = ws.deserializeAttachment()?.clientId;
-    } catch {
-      return;
-    }
-
+    try { clientId = ws.deserializeAttachment()?.clientId; } catch { return; }
     if (!clientId) return;
-
-    const anotherConnection = this.ctx
-      .getWebSockets()
-      .some(other => {
-        if (other === ws) return false;
-
-        try {
-          return (
-            other.readyState === WebSocket.OPEN &&
-            other.deserializeAttachment()?.clientId === clientId
-          );
-        } catch {
-          return false;
-        }
-      });
-
+    const anotherConnection = this.ctx.getWebSockets().some(other => {
+      if (other === ws) return false;
+      try { return other.readyState === WebSocket.OPEN && other.deserializeAttachment()?.clientId === clientId; } catch { return false; }
+    });
     if (anotherConnection) return;
-
     const room = this.room;
-
-    room.players = room.players.filter(
-      player => player.id !== clientId
-    );
-
+    room.players = room.players.filter(p => p.id !== clientId);
     delete room.pendingAnswers[clientId];
-
-    if (room.players.length === 0) {
-      this.room = null;
-      await this.ctx.storage.delete("room");
-      return;
-    }
-
-    if (room.hostId === clientId) {
-      room.hostId = room.players[0].id;
-    }
-
-    if (
-      room.phase === "playing" &&
-      room.players.every(player => player.submitted)
-    ) {
-      await this.finishRound();
-      return;
-    }
-
+    if (room.players.length === 0) { this.room = null; await this.ctx.storage.delete("room"); return; }
+    if (room.hostId === clientId) room.hostId = room.players[0].id;
+    if (room.phase === "playing" && room.players.every(p => p.submitted)) { await this.finishRound(); return; }
     await this.update();
   }
-    }
+  }
