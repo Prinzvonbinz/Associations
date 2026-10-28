@@ -95,7 +95,7 @@ const CATEGORIES = [
   "Nenne etwas, das man bei einem Straßenfest sieht",
   "Nenne etwas, das man mit einer Tastatur macht",
 
-  // 🎬 FILME & UNTERHALTUNG
+  // FILME & UNTERHALTUNG
   "Nenne einen Animationsfilm",
   "Nenne einen Film mit Superhelden",
   "Nenne eine bekannte Filmreihe",
@@ -117,7 +117,7 @@ const CATEGORIES = [
   "Nenne eine Art von Zaubertrick",
   "Nenne etwas, das in einem Escape Room vorkommt",
 
-  // 🏫 SCHULE & WISSEN
+  // SCHULE & WISSEN
   "Nenne ein chemisches Element",
   "Nenne ein Säugetier",
   "Nenne einen Planeten",
@@ -139,7 +139,7 @@ const CATEGORIES = [
   "Nenne eine Maßeinheit für Länge",
   "Nenne eine mathematische Rechenoperation",
 
-  // 🏙️ ORTE & REISEN
+  // ORTE & REISEN
   "Nenne eine Insel im Mittelmeer",
   "Nenne eine Großstadt in Asien",
   "Nenne ein Land in Südamerika",
@@ -161,7 +161,7 @@ const CATEGORIES = [
   "Nenne einen Ort unter der Erde",
   "Nenne einen Ort, den man nur mit einem Boot erreicht",
 
-  // ⚽ SPORT & BEWEGUNG
+  // SPORT & BEWEGUNG
   "Nenne eine olympische Sportart",
   "Nenne eine Ballsportart",
   "Nenne eine Wintersportart",
@@ -183,7 +183,7 @@ const CATEGORIES = [
   "Nenne ein Sportereignis",
   "Nenne eine Ausrüstung für den Radsport",
 
-  // 👕 GEGENSTÄNDE & MODE
+  // GEGENSTÄNDE & MODE
   "Nenne einen Kleidungsstil",
   "Nenne ein Accessoire für den Kopf",
   "Nenne eine Art von Schuh",
@@ -196,7 +196,8 @@ const CATEGORIES = [
   "Nenne etwas, das man aufhängen kann",
   "Nenne einen Gegenstand mit Rädern",
   "Nenne etwas mit einem Display",
-  "Nenne einen Gegenstand mit einem Magneten","Nenne etwas, das man aufladen muss",
+  "Nenne einen Gegenstand mit einem Magneten",
+  "Nenne etwas, das man aufladen muss",
   "Nenne etwas, das Wasser filtert",
   "Nenne einen Gegenstand mit einem Schloss",
   "Nenne etwas, das Geräusche erzeugt",
@@ -204,7 +205,7 @@ const CATEGORIES = [
   "Nenne einen Gegenstand aus Papier",
   "Nenne etwas, das man zusammenklappen kann",
 
-  // 😂 HUMOR & CHAOS
+  // HUMOR & CHAOS
   "Nenne etwas, das bei einer Party schiefgehen kann",
   "Nenne einen peinlichen Moment",
   "Nenne einen absurden Superheldennamen",
@@ -226,7 +227,7 @@ const CATEGORIES = [
   "Nenne eine ungewöhnliche Zutat für einen Kuchen",
   "Nenne einen schlechten Namen für eine Band",
 
-  // 🧠 KNIFFLIGE KATEGORIEN
+  // KNIFFLIGE KATEGORIEN
   "Nenne ein Wort mit genau drei Buchstaben",
   "Nenne ein Wort mit fünf Silben",
   "Nenne ein deutsches Wort mit Doppelbuchstaben",
@@ -248,7 +249,7 @@ const CATEGORIES = [
   "Nenne ein Wort mit genau zwei Silben",
   "Nenne ein Wort, das man leicht falsch schreibt",
 
-  // 🚀 FANTASIE & ZUKUNFT
+  // FANTASIE & ZUKUNFT
   "Nenne eine futuristische Erfindung",
   "Nenne einen Beruf im Jahr 2200",
   "Nenne etwas, das auf dem Mars gebaut werden könnte",
@@ -270,7 +271,7 @@ const CATEGORIES = [
   "Nenne ein Fortbewegungsmittel für eine Fantasywelt",
   "Nenne einen Namen für eine geheime Organisation",
 
-  // 🎃 JAHRESZEITEN & ANLÄSSE
+  // JAHRESZEITEN & ANLÄSSE
   "Nenne etwas, das man an Silvester macht",
   "Nenne eine Halloween-Verkleidung",
   "Nenne etwas, das man auf einem Weihnachtsmarkt kauft",
@@ -279,7 +280,8 @@ const CATEGORIES = [
   "Nenne eine typische Geburtstagsüberraschung",
   "Nenne etwas, das man beim Camping benötigt",
   "Nenne eine Aktivität an einem Regentag",
-  // 🌍 ALLTAG & WELT
+
+  // ALLTAG & WELT
   "Nenne etwas, das man jeden Morgen macht",
   "Nenne etwas, das in einer Hosentasche steckt",
   "Nenne etwas, das man verlieren kann",
@@ -301,7 +303,7 @@ const CATEGORIES = [
   "Nenne etwas, das man vor dem Verlassen des Hauses überprüft",
   "Nenne etwas, das man nur selten benutzt",
 
-  // 🍕 ESSEN & TRINKEN
+  // ESSEN & TRINKEN
   "Nenne eine ungewöhnliche Pizzazutat",
   "Nenne ein Lebensmittel, das knackt",
   "Nenne ein Gericht, das man mit den Händen isst",
@@ -323,7 +325,7 @@ const CATEGORIES = [
   "Nenne ein Getränk, das heiß serviert wird",
   "Nenne etwas, das man mit Zucker bestreut",
 
-  // 🐾 TIERE & NATUR
+  // TIERE & NATUR
   "Nenne ein Tier mit Streifen",
   "Nenne ein Tier, das nachts aktiv ist",
   "Nenne ein Tier, das fliegen kann",
@@ -345,7 +347,7 @@ const CATEGORIES = [
   "Nenne etwas, das man am Strand finden kann",
   "Nenne eine Pflanze, die man essen kann",
 
-  // 🎮 GAMING & TECH
+  // GAMING & TECH
   "Nenne ein bekanntes Videospiel",
   "Nenne eine Spielkonsole",
   "Nenne ein Gaming-Zubehör",
@@ -363,24 +365,38 @@ const CATEGORIES = [
   "Nenne ein soziales Netzwerk",
   "Nenne eine Computerkomponente",
   "Nenne eine Dateiendung",
-  "Nenne ein digitales Dateiformat",
-  "Nenne ein Gerät mit Bluetooth",
+  "Nenne ein digitales Dateiformat"
 ];
 
 function randomId() {
   return crypto.randomUUID();
 }
 
-function randomCategory() {
-  return CATEGORIES[
-    Math.floor(Math.random() * CATEGORIES.length)
-  ];
-}
-
 function normalizeAnswer(answer) {
   return String(answer)
-  .toLocaleLowerCase("de-DE")
-  .replace(/\s+/g, "");
+    .normalize("NFC")
+    .toLocaleLowerCase("de-DE")
+    .replace(/[^\p{L}\p{N}]/gu, "");
+}
+
+function normalizeCategory(category) {
+  return String(category)
+    .normalize("NFC")
+    .toLocaleLowerCase("de-DE")
+    .replace(/[^\p{L}\p{N}]/gu, "");
+}
+
+function randomCategory(usedCategories = []) {
+  const used = new Set(usedCategories.map(normalizeCategory));
+  const available = CATEGORIES.filter(
+    category => !used.has(normalizeCategory(category))
+  );
+
+  if (available.length === 0) {
+    throw new Error("Keine unbenutzten Kategorien mehr verfügbar.");
+  }
+
+  return available[Math.floor(Math.random() * available.length)];
 }
 
 function validRounds(value) {
@@ -438,17 +454,28 @@ export class Room {
   constructor(ctx, env) {
     this.ctx = ctx;
     this.env = env;
-    this.room = null;this.ready = this.ctx.storage
+    this.room = null;
+
+    this.ready = this.ctx.storage
       .get("room")
       .then(saved => {
         this.room = saved || null;
+
+        // Felder ergänzen, falls eine ältere gespeicherte Lobby geladen wird.
+        if (this.room) {
+          this.room.usedCategories ??= [];
+          this.room.players ??= [];
+
+          this.room.players.forEach(player => {
+            player.usedAnswers ??= [];
+          });
+        }
       });
   }
 
   async fetch(request) {
     if (
-      request.headers.get("Upgrade")?.toLowerCase()
-      !== "websocket"
+      request.headers.get("Upgrade")?.toLowerCase() !== "websocket"
     ) {
       return new Response("WebSocket erforderlich.", {
         status: 426
@@ -501,11 +528,13 @@ export class Room {
         teamScore: 0,
         category: "",
         gameId: "",
+        usedCategories: [],
         players: [
           {
             id: clientId,
             username,
-            submitted: false
+            submitted: false,
+            usedAnswers: []
           }
         ],
         pendingAnswers: {},
@@ -524,6 +553,7 @@ export class Room {
 
       if (existing) {
         existing.username = username;
+        existing.usedAnswers ??= [];
       } else {
         if (this.room.phase !== "lobby") {
           return new Response(
@@ -541,7 +571,8 @@ export class Room {
         this.room.players.push({
           id: clientId,
           username,
-          submitted: false
+          submitted: false,
+          usedAnswers: []
         });
       }
     }
@@ -569,6 +600,7 @@ export class Room {
 
     const {
       pendingAnswers,
+      usedCategories,
       ...state
     } = this.room;
 
@@ -624,7 +656,9 @@ export class Room {
   }
 
   async webSocketMessage(ws, message) {
-    await this.ready;if (!this.room) return;
+    await this.ready;
+
+    if (!this.room) return;
 
     let data;
 
@@ -651,6 +685,9 @@ export class Room {
     );
 
     if (!player) return;
+
+    player.usedAnswers ??= [];
+    room.usedCategories ??= [];
 
     const isHost = room.hostId === clientId;
 
@@ -682,13 +719,18 @@ export class Room {
         room.roundsTotal = validRounds(data.rounds);
         room.roundIndex = 1;
         room.teamScore = 0;
-        room.category = randomCategory();
         room.gameId = randomId();
         room.history = [];
         room.pendingAnswers = {};
+        room.usedCategories = [];
+
         room.players.forEach(p => {
           p.submitted = false;
+          p.usedAnswers = [];
         });
+
+        room.category = randomCategory(room.usedCategories);
+        room.usedCategories.push(normalizeCategory(room.category));
         room.phase = "playing";
 
         await this.update();
@@ -708,6 +750,25 @@ export class Room {
           return;
         }
 
+        const normalized = normalizeAnswer(answer);
+
+        if (!normalized) {
+          this.sendError(
+            ws,
+            "Bitte gib ein Wort mit Buchstaben oder Zahlen ein."
+          );
+          return;
+        }
+
+        if (player.usedAnswers.includes(normalized)) {
+          this.sendError(
+            ws,
+            "Du hast dieses Wort in dieser Partie bereits benutzt."
+          );
+          return;
+        }
+
+        player.usedAnswers.push(normalized);
         room.pendingAnswers[clientId] = answer;
         player.submitted = true;
 
@@ -715,7 +776,7 @@ export class Room {
           room.players.length > 0 &&
           room.players.every(p => p.submitted)
         ) {
-          this.finishRound();
+          await this.finishRound();
         } else {
           await this.update();
         }
@@ -733,13 +794,14 @@ export class Room {
         }
 
         room.roundIndex++;
-        room.category = randomCategory();
         room.pendingAnswers = {};
 
         room.players.forEach(p => {
           p.submitted = false;
         });
 
+        room.category = randomCategory(room.usedCategories);
+        room.usedCategories.push(normalizeCategory(room.category));
         room.phase = "playing";
 
         await this.update();
@@ -770,9 +832,11 @@ export class Room {
         room.roundIndex = 1;
         room.category = "";
         room.pendingAnswers = {};
+        room.usedCategories = [];
 
         room.players.forEach(p => {
           p.submitted = false;
+          p.usedAnswers = [];
         });
 
         await this.update();
@@ -808,7 +872,9 @@ export class Room {
       if (count >= 2) {
         points += count;
       }
-    }room.teamScore += points;
+    }
+
+    room.teamScore += points;
 
     room.history.push({
       round: room.roundIndex,
@@ -891,4 +957,4 @@ export class Room {
 
     await this.update();
   }
-}
+    }
