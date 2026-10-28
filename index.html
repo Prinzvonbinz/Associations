@@ -1331,8 +1331,8 @@ function renderGame(state) {
 
 function normalizeAnswer(answer) {
   return String(answer)
-    .trim()
-    .toLocaleLowerCase("de-DE");
+    .toLocaleLowerCase("de-DE")
+  .return(/\s+/g, "");
 }
 
 function renderAnswers(state) {
