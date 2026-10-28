@@ -206,7 +206,8 @@ h1 {
 .subtitle {
   max-width: 510px;
   margin: auto;
-  color: var(--muted);line-height: 1.8;
+  color: var(--muted);
+  line-height: 1.8;
 }
 
 h2, h3, p {
@@ -444,7 +445,8 @@ textarea {
 
 .answer-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
   margin: 20px 0;
 }
 
@@ -595,7 +597,6 @@ footer {
 </head>
 
 <body>
-
 <div class="app">
 
 <header>
@@ -611,9 +612,7 @@ footer {
 </header>
 
 <!-- HAUPTMENÜ -->
-
 <section class="screen active" id="screen-home">
-
   <div class="hero">
     <div class="eyebrow">✦ THE POWER OF THINKING ALIKE</div>
 
@@ -642,7 +641,6 @@ footer {
   </div>
 
   <div class="grid">
-
     <div class="panel">
       <h2 class="section-title">✦ Lobby erstellen</h2>
 
@@ -665,13 +663,13 @@ footer {
 
       <input id="joinCode"
         maxlength="6"
-        placeholder="ABC123"autocomplete="off">
+        placeholder="ABC123"
+        autocomplete="off">
 
       <button class="btn cyan full" id="joinButton">
         Beitreten →
       </button>
     </div>
-
   </div>
 
   <div class="stats">
@@ -690,32 +688,22 @@ footer {
       <span>Team-Punkte gesammelt</span>
     </div>
   </div>
-
 </section>
 
 <!-- LOBBY -->
-
 <section class="screen" id="screen-lobby">
-
   <div class="screen-head">
-
-    <button class="btn" id="leaveLobby">
-      ← Hauptmenü
-    </button>
+    <button class="btn" id="leaveLobby">← Hauptmenü</button>
 
     <div>
       <div class="muted">DEIN LOBBY-CODE</div>
       <div class="room-code" id="lobbyCode">------</div>
     </div>
 
-    <button class="btn" id="copyCode">
-      Code kopieren
-    </button>
-
+    <button class="btn" id="copyCode">Code kopieren</button>
   </div>
 
   <div class="lobby-grid">
-
     <div class="panel">
       <h2 class="section-title">Spieler im Raum</h2>
 
@@ -733,21 +721,20 @@ footer {
         Legt gemeinsam eure Rundenzahl fest.
       </p>
 
-  <label class="field-label" for="roundCount">
-  ANZAHL DER RUNDEN
-</label>
+      <label class="field-label" for="roundCount">
+        ANZAHL DER RUNDEN
+      </label>
 
-<input
-  id="roundCount"
-  type="number"
-  min="1"
-  max="100"
-  value="5"
-  step="1"
-  inputmode="numeric"
-  placeholder="Rundenzahl eingeben"
-  >
-  
+      <input
+        id="roundCount"
+        type="number"
+        min="1"
+        max="100"
+        value="5"
+        step="1"
+        inputmode="numeric"
+        placeholder="Rundenzahl eingeben">
+
       <div id="hostControls">
         <button class="btn primary full" id="startGame">
           Spiel starten ✦
@@ -756,14 +743,11 @@ footer {
 
       <p class="muted" id="lobbyHint"></p>
     </div>
-
   </div>
 </section>
 
 <!-- SPIEL -->
-
 <section class="screen" id="screen-game">
-
   <div class="score-panel">
     <div>
       <div class="muted">GEMEINSAMER TEAM-SCORE</div>
@@ -786,7 +770,7 @@ footer {
   </div>
 
   <div class="category-card">
-    <div class="eyebrow">✦ EURE KATEGORIE</div>
+    <div class="eyebrow">✦ WELCHE KATEGORIE?</div>
 
     <h2 id="categoryTitle">Bereit?</h2>
 
@@ -797,13 +781,13 @@ footer {
   </div>
 
   <div class="panel">
-
     <div id="answerArea">
       <h2 class="section-title">Was ist deine Antwort?</h2>
 
       <p class="muted">
         Niemand sieht deine Antwort, bevor alle
-        Spieler fertig sind.
+        Spieler fertig sind. Du darfst dein eigenes Wort
+        in dieser Partie nicht erneut verwenden.
       </p>
 
       <textarea id="answerInput"
@@ -828,14 +812,15 @@ footer {
       <h2 class="section-title">Die Antworten sind da!</h2>
 
       <p class="muted">
-        Gleiche Antworten zählen unabhängig von Groß-
-        und Kleinschreibung.
+        Gleiche Antworten zählen unabhängig von Groß- und
+        Kleinschreibung, Leerzeichen und Satzzeichen.
       </p>
 
       <div class="answer-grid" id="answerGrid"></div>
 
       <div class="round-points">
-        <div class="muted">PUNKTE FÜR DAS GESAMTE TEAM</div><strong id="roundPoints">+0</strong>
+        <div class="muted">PUNKTE FÜR DAS GESAMTE TEAM</div>
+        <strong id="roundPoints">+0</strong>
 
         <span class="muted" id="roundPointsDescription"></span>
       </div>
@@ -846,14 +831,11 @@ footer {
 
       <p class="muted" id="nextRoundHint"></p>
     </div>
-
   </div>
 </section>
 
 <!-- ERGEBNISSE -->
-
 <section class="screen" id="screen-results">
-
   <div class="hero">
     <div class="eyebrow">✦ GAME COMPLETED</div>
 
@@ -867,7 +849,6 @@ footer {
   </div>
 
   <div class="panel">
-
     <div class="score-panel">
       <div>
         <div class="muted">GEMEINSAMER ENDSCORE</div>
@@ -889,7 +870,6 @@ footer {
     </button>
 
     <p class="muted" id="resultsHint"></p>
-
   </div>
 </section>
 
@@ -902,10 +882,8 @@ footer {
 <div class="toast" id="toast" role="status"></div>
 
 <!-- EINSTELLUNGEN -->
-
 <div class="modal" id="settingsModal">
   <div class="panel">
-
     <div class="screen-head">
       <h2>Einstellungen</h2>
       <button class="btn" id="closeSettings">✕</button>
@@ -928,7 +906,6 @@ footer {
     <button class="btn primary full" id="saveSettings">
       Einstellungen speichern
     </button>
-
   </div>
 </div>
 
@@ -1021,7 +998,8 @@ function setScreen(name) {
 
 function escapeHTML(value) {
   return String(value).replace(/[&<>"']/g, char => ({
-    "&": "&amp;","<": "&lt;",
+    "&": "&amp;",
+    "<": "&lt;",
     ">": "&gt;",
     '"': "&quot;",
     "'": "&#39;"
@@ -1163,8 +1141,23 @@ function connectRoom(code, mode) {
     if (socket !== activeSocket) return;
 
     if (data.type === "error") {
+      const duplicateMessage =
+        "Du hast dieses Wort in dieser Partie bereits benutzt.";
+
+      if (data.message === duplicateMessage) {
+        // Verbindung bleibt offen. Spieler kann ein anderes Wort eingeben.
+        toast(data.message);
+
+        $("answerInput").disabled = false;
+        $("submitAnswer").disabled = false;
+        $("answerInput").focus();
+
+        return;
+      }
+
       toast(data.message || "Ein Fehler ist aufgetreten.");
 
+      // Andere Fehler behandeln wir wie bisher.
       activeSocket.close();
       return;
     }
@@ -1223,7 +1216,8 @@ function renderState(state) {
     renderGame(state);
     setScreen("game");
   } else if (state.phase === "results") {
-    renderResults(state);setScreen("results");
+    renderResults(state);
+    setScreen("results");
   }
 }
 
@@ -1331,10 +1325,18 @@ function renderGame(state) {
   }
 }
 
+/*
+ * Vereinheitlicht Antworten:
+ * - Groß- und Kleinschreibung werden ignoriert.
+ * - Leerzeichen werden ignoriert.
+ * - Satzzeichen und Symbole werden ignoriert.
+ * - Buchstaben und Zahlen bleiben erhalten.
+ */
 function normalizeAnswer(answer) {
   return String(answer)
+    .normalize("NFC")
     .toLocaleLowerCase("de-DE")
-    .replace(/\s+/g, "");
+    .replace(/[^\p{L}\p{N}]/gu, "");
 }
 
 function renderAnswers(state) {
@@ -1365,10 +1367,11 @@ function renderAnswers(state) {
         <div class="muted" style="margin-top:10px">
           ${matched ? "✓ ÜBEREINSTIMMUNG" : "Keine Übereinstimmung"}
         </div>
-
       </div>
     `;
-  }).join("");$("roundPoints").textContent = "+" + round.points;
+  }).join("");
+
+  $("roundPoints").textContent = "+" + round.points;
 
   $("roundPointsDescription").textContent = round.points
     ? "Punkte für das gemeinsame Teamkonto."
@@ -1486,7 +1489,7 @@ $("submitAnswer").addEventListener("click", () => {
     return;
   }
 
-  send("submit", {answer});
+  send("submit", { answer });
 });
 
 $("answerInput").addEventListener("keydown", event => {
@@ -1532,7 +1535,9 @@ $("copyCode").addEventListener("click", async () => {
   }
 });
 
-$("settingsButton").addEventListener("click", openSettings);$("closeSettings").addEventListener("click", () => {
+$("settingsButton").addEventListener("click", openSettings);
+
+$("closeSettings").addEventListener("click", () => {
   $("settingsModal").classList.remove("show");
 });
 
@@ -1575,4 +1580,4 @@ refreshStats();
 </script>
 
 </body>
-</html>
+  </html>
