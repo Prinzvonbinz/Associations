@@ -61,8 +61,8 @@ function randomCategory() {
 
 function normalizeAnswer(answer) {
   return String(answer)
-    .trim()
-    .toLocaleLowerCase("de-DE");
+    .toLocaleLowerCase("de-DE")
+  .return(/\s+/g, "");
 }
 
 function errorResponse(message, status = 400) {
