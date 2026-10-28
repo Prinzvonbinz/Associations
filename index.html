@@ -733,7 +733,6 @@ footer {
         Legt gemeinsam eure Rundenzahl fest.
       </p>
 
-      
   <label class="field-label" for="roundCount">
   ANZAHL DER RUNDEN
 </label>
@@ -748,8 +747,7 @@ footer {
   inputmode="numeric"
   placeholder="Rundenzahl eingeben"
   >
-
-
+  
       <div id="hostControls">
         <button class="btn primary full" id="startGame">
           Spiel starten ✦
@@ -1336,7 +1334,7 @@ function renderGame(state) {
 function normalizeAnswer(answer) {
   return String(answer)
     .toLocaleLowerCase("de-DE")
-  .return(/\s+/g, "");
+    .replace(/\s+/g, "");
 }
 
 function renderAnswers(state) {
@@ -1577,4 +1575,4 @@ refreshStats();
 </script>
 
 </body>
-  </html>
+</html>
