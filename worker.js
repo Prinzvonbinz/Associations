@@ -418,7 +418,7 @@ export default {
         });
       }
 
-      const id = env.ROOM.idFromName(code);
+      const id = env.ROOMS.idFromName(code);
       const room = env.ROOMS.get(id);
 
       return room.fetch(request);
