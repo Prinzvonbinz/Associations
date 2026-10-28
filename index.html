@@ -733,18 +733,22 @@ footer {
         Legt gemeinsam eure Rundenzahl fest.
       </p>
 
-      <label class="field-label" for="roundCount">
-        RUNDENANZAHL
-      </label>
+      
+  <label class="field-label" for="roundCount">
+  ANZAHL DER RUNDEN
+</label>
 
-      <select id="roundCount">
-        <option value="3">3 Runden</option>
-        <option value="5" selected>5 Runden</option>
-        <option value="8">8 Runden</option>
-        <option value="10">10 Runden</option>
-        <option value="15">15 Runden</option>
-        <option value="20">20 Runden</option>
-      </select>
+<input
+  id="roundCount"
+  type="number"
+  min="1"
+  max="100"
+  value="5"
+  step="1"
+  inputmode="numeric"
+  placeholder="Rundenzahl eingeben"
+  >
+
 
       <div id="hostControls">
         <button class="btn primary full" id="startGame">
